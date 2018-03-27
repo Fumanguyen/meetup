@@ -98,3 +98,20 @@ ggplot(Topic_Together, aes(topic_name1, topic_name2)) + geom_count(aes(color=..n
 labs(title = 'Frequently interested together') + 
 theme(axis.text.x = element_text(angle = 90), axis.text.y = element_text(size=5)) + 
 scale_color_gradient(low='orange', high = 'dark blue')
+
+############
+
+## Question 6: What are the categories that are frequently interested together by mamber?
+MemberCat1 <- MemberGroup %>% inner_join(Groups, by = c('group_id' = 'group_id')) %>% inner_join(Categories, by = c('category_id' = 'category_id')) %>%
+  select(member_id, category_id, category_name) %>% rename(category_name1 = category_name) %>% rename(category_id1 = category_id)
+
+MemberCat2 <- MemberGroup %>% inner_join(Groups, by = c('group_id' = 'group_id')) %>% inner_join(Categories, by = c('category_id' = 'category_id')) %>%
+  select(member_id, category_id, category_name) %>% rename(category_name2 = category_name) %>% rename(category_id2 = category_id)
+
+Cat_Together <- MemberCat1 %>% inner_join(MemberCat2, by = c('member_id'= 'member_id')) %>%
+  filter(category_id1 != category_id2) 
+
+### Visualization
+ggplot(Cat_Together, aes(category_name1, category_name2)) + geom_count(aes(color = ..n..)) + labs(title = 'Frequently interested together - Category') +
+  theme(axis.text.x = element_text(angle = 90), axis.text.y = element_text(size=5)) + 
+  scale_color_gradient2(low='red', high = 'dark blue', mid = 'green', midpoint = 700000)
