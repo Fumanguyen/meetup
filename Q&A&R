@@ -10,3 +10,91 @@ MemberTopic <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/
 GroupTopic <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/grouptopic.xlsx')
 MemberGroup <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/memberGroup.xlsx')
 
+#Loading needed libraries
+
+library(tidyverse)
+library(treemap)
+
+## Question 1: What categories are more popular in general?
+## Measure by Number of Group created
+
+Popular_Category <- Groups %>% inner_join(Categories, by = c('category_id'='category_id')) %>% 
+group_by(category_name) %>% summarize(NumGroup= n()) %>% arrange(desc(NumGroup))
+
+
+## Measure by Number of Member
+
+Popular_Category_2 <- MemberGroup %>% inner_join(Groups, by = c('group_id'='group_id')) %>% 
+inner_join(Categories, by = c('category_id'='category_id')) %>% group_by(category_name) %>% 
+summarize(NumMem=n()) %>% arrange(desc(NumMem))
+
+
+## Visualization
+ggplot(top_n(Popular_Category,10), aes(category_name,NumGroup)) + geom_col()
+treemap(Popular_Category, index='category_name', vSize = 'NumGroup', vColor = "NumGroup", type = "value")
+
+#########
+
+## Question 2: What are the difference among cities interm of categories?
+## The number of category for each city
+
+names (Cities) <- gsub(" ", "_", names(Cities))  # this function replace all the space in column names with "_"
+
+Cat_City <- Groups %>% inner_join(Categories, by = c('category_id'='category_id')) %>% 
+inner_join(Cities, by = c('city_id'='city_id')) %>% 
+group_by(city_name) %>% summarize(NumCat=n_distinct(category_id)) %>% arrange(desc(NumCat))   
+
+
+## Number of Group created for each category in each city
+
+Group_Cat_City <- Groups %>% inner_join(Categories, by = c('category_id'='category_id')) %>% 
+  inner_join(Cities, by = c('city_id'='city_id')) %>% group_by(category_name, city_name) %>% 
+  summarize(NumGroup=n_distinct(group_id)) %>% arrange(city_name, desc(NumGroup))
+
+
+## Visualization
+ggplot(filter(Groups %>% inner_join(Categories, by = c('category_id'='category_id')) %>% 
+                inner_join(Cities, by = c('city_id'='city_id')), city_name %in% c('Chicago','New York', 'San Francisco')), aes(city_name,category_name)) + 
+  geom_count(aes(color = city_name), shape = 15)
+
+############
+
+## Question 3: The popularity of different categories (in term of group created) across the years (2002-2017)
+library(lubridate) #package for date & time
+
+Group_Cat <- Groups %>% inner_join(Categories, by = c('category_id'='category_id')) %>% mutate(year = year(created)) %>% 
+group_by(category_name, year) %>% summarize(NumGroup= n_distinct(group_id)) %>% arrange(category_name, year)
+
+
+## Visualization
+
+ggplot(Group_Cat, aes(year, NumGroup)) + geom_line(aes(color = category_name ))
+
+############
+
+## Question 4: What are the number of group created month-by-month, weekday-by-weekday over the years (2002-2017))
+
+Group_moy_dow <- Groups %>% mutate(dow = wday(created, label = TRUE), month = month(created, label = TRUE), year = year(created)) %>% group_by(month, dow, year) %>% summarize (NumGroup=n_distinct(group_id)) %>% arrange(month, dow)
+Group_moy_dow$monthdow <- paste(Group_moy_dow$month, Group_moy_dow$dow) ##combine 2 columns into 1 column
+
+ggplot(Group_moy_dow, aes(as.factor(monthdow),NumGroup, color = as.character(year),group = year, lty='3')) + geom_line() + 
+  theme(axis.text.x = element_text(angle = 90))   # Using theme (axis.text.x, axis.text.y and element_text to change the tick labels)
+
+############
+
+## Question 5: What are the topics that are frequently interested together by member
+
+MemberTopic2 <- MemberTopic %>% inner_join(Topics, by=c('topic_id'= 'topic_id')) %>% rename(topic_name1 = topic_name) %>% 
+rename(topic_id1 = topic_id)
+
+MemberTopic3 <- MemberTopic %>% inner_join(Topics, by=c('topic_id'= 'topic_id')) %>% rename(topic_name2 = topic_name) %>% 
+rename(topic_id2 =  topic_id) 
+
+Topic_Together <- MemberTopic2 %>% inner_join(MemberTopic3, by = c('member_id'= 'member_id')) %>% filter(topic_id1 != topic_id2)
+Topic_Together
+
+#visualization
+ggplot(Topic_Together, aes(topic_name1, topic_name2)) + geom_count(aes(color=..n..)) + 
+labs(title = 'Frequently interested together') + 
+theme(axis.text.x = element_text(angle = 90), axis.text.y = element_text(size=5)) + 
+scale_color_gradient(low='orange', high = 'dark blue')
