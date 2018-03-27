@@ -1,1 +1,12 @@
+library(readxl)
+Events <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/events.xlsx')
+Members <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/members.xlsx')
+Groups <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/groups.xlsx')
+Topics <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/topics.xlsx')
+Venues <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/venues.xlsx')
+Cities <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/cities.xlsx')
+Categories <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/categories.xlsx')
+MemberTopic <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/membertopic.xlsx')
+GroupTopic <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/grouptopic.xlsx')
+MemberGroup <- read_excel('~/Desktop/MBA study/Courses/Data Analytics Materials/Datasets/Meetup/memberGroup.xlsx')
 
